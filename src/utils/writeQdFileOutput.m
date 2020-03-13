@@ -32,7 +32,7 @@ function writeQdFileOutput(output, useOptimizedOutputToFile,...
 if ~useOptimizedOutputToFile
     filename = sprintf('Tx%dRx%d.txt', iTx - 1, iRx - 1);
     filepath = fullfile(qdFilesPath, filename);
-    fid = fopen(filepath, 'A');
+    fid = fopen(filepath, 'At');
 else
     fid = fids(iTx, iRx);
 end

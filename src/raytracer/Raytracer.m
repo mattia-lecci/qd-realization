@@ -220,16 +220,18 @@ for iterateTimeDivision = 1:paraCfgInput.numberOfTimeDivisions
                 currentMaxPathGain = -Inf;
             end
             
-            if paraCfgInput.switchSaveVisualizerFiles &&...
-                    ~isempty(output)
-                
-                filename = sprintf('MpcTx%dRx%dRefl%dTrc%d.csv',...
-                    iterateTx-1, iterateRx-1, 0, iterateTimeDivision-1);
-                csvwrite(fullfile(mpcCoordinatesPath, filename),...
-                    rayVertices);
+            if ~isempty(output)
                 % LoS ray does not interact with any triangle
                 triangList{1} = [];
                 
+                if paraCfgInput.switchSaveVisualizerFiles
+                    
+                    filename = sprintf('MpcTx%dRx%dRefl%dTrc%d.csv',...
+                        iterateTx-1, iterateRx-1, 0, iterateTimeDivision-1);
+                    csvwrite(fullfile(mpcCoordinatesPath, filename),...
+                        rayVertices);
+                    
+                end
             end
             
             % Higher order reflections (Non LOS)

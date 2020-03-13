@@ -30,24 +30,28 @@ function fids = getOutputFids(folderpath, numberOfNodes, useOptimizedOutputToFil
 % See the License for the specific language governing permissions and
 % limitations under the License.
 
-if ~useOptimizedOutputToFile
-    fids = [];
-    
-else
+if useOptimizedOutputToFile
     fids = nan(numberOfNodes, numberOfNodes);
-    
-    for iTx = 1:numberOfNodes
-        for iRx = 1:numberOfNodes
-            if iTx == iRx
-                continue
-            end
-            
-            filename = sprintf('Tx%dRx%d.txt', iTx-1, iRx-1);
-            filepath = fullfile(folderpath, filename);
-            
-            fids(iTx,iRx) = fopen(filepath,'At');
+else
+    fids = [];
+end
+
+for iTx = 1:numberOfNodes
+    for iRx = 1:numberOfNodes
+        if iTx == iRx
+            continue
         end
         
+        filename = sprintf('Tx%dRx%d.txt', iTx-1, iRx-1);
+        filepath = fullfile(folderpath, filename);
+        
+        if useOptimizedOutputToFile
+            fids(iTx,iRx) = fopen(filepath,'Wt');
+        else
+            delete(filepath)
+        end
     end
     
+end
+
 end
