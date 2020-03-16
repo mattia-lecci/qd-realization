@@ -20,6 +20,13 @@ function [output, cursorOutput, outputPre, outputPost] = reducedMultipleReflecti
 % See the License for the specific language governing permissions and
 % limitations under the License.
 
+if nargin < 4
+    losDelay = 0;
+end
+if nargin < 5
+    minPgThreshold = -Inf;
+end
+
 % init
 cursorOutput = inRayOutput;
 totMaterials = length(arrayOfMaterials);
