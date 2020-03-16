@@ -1,6 +1,6 @@
 function [exists, dod, doa, multipath, rayLength, dopplerFactor, pathGain] =...
     computeSingleRay(txPos, rxPos, txVel, rxVel, triangIdxList, cadData,...
-    visibilityMatrix, materialLibrary, switchQd, switchMaterial, freq)
+    visibilityMatrix, materialLibrary, freq)
 %COMPUTESINGLERAY Computes geometry and physics of a ray between txPos and
 %rxPos, bouncing over a give list of triangles
 
@@ -21,7 +21,7 @@ function [exists, dod, doa, multipath, rayLength, dopplerFactor, pathGain] =...
 % limitations under the License.
 
 [intersections, pathGain, rayLength] = methodOfImages(txPos, rxPos,...
-    cadData, materialLibrary, triangIdxList, switchQd, freq, 1);
+    cadData, materialLibrary, triangIdxList, freq, 1);
 
 if isempty(intersections)
     % the ray does not exist

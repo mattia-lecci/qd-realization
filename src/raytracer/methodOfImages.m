@@ -1,6 +1,6 @@
 function [intersections, totPathGain, totRayLen, totReflectionLoss] =...
     methodOfImages(txPos, rxPos, cadData, materialLibrary,...
-    triangIdxs, switchQd, freq, recursionDepth)
+    triangIdxs, freq, recursionDepth)
 %METHODOFIMAGES Recursive function implementing the Method of Images. Tx is
 %recursively reflected over all triangles in triangIdx and intersections
 %are computed. If any intersection is invalid, an empty array is returned,
@@ -43,7 +43,7 @@ else % need more reflections
     % Proceed to the next recursion level
     [intersections, totPathGain, totRayLen, totReflectionLoss] =...
         methodOfImages(txPosReflected, rxPos, cadData, materialLibrary,...
-        triangIdxs, switchQd, freq, recursionDepth+1);
+        triangIdxs, freq, recursionDepth+1);
     
     if isempty(intersections)
         % If intersection cannot exist stop
@@ -71,7 +71,7 @@ if isInsideTriangle
     [totReflectionLoss, totRayLen, totPathGain] =...
         getPartialPathGain(totReflectionLoss, totRayLen, intersections,...
         txPos, rxPos, cadData, materialLibrary,...
-        triangIdxs, recursionDepth, switchQd, freq);
+        triangIdxs, recursionDepth, freq);
     
 else
     % Invalid if intersection happens outside the triangle's boundaries
@@ -86,7 +86,7 @@ end
 function [totReflectionLoss, totRayLen, pathGain] =...
     getPartialPathGain(totReflectionLoss, totRayLen, intersections,...
     txPos, rxPos, cadData, materialLibrary,...
-    triangIdxs, recursionDepth, switchQd, freq)
+    triangIdxs, recursionDepth, freq)
 
 currentIntersection = intersections(recursionDepth, :);
 if recursionDepth == length(triangIdxs)
