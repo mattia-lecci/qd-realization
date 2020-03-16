@@ -88,9 +88,14 @@ end
 % no limitation (Default).
 para = fieldToNum(para, 'selectPlanesByDist', [], 0);
 
-% Switch to turn ON or OFF the Qausi dterministic module
-% 1 = ON, 0 = OFF (Default)
-para = fieldToNum(para, 'switchQDGenerator', [0,1], 0);
+% Parameter to choose the type of qdGenerator
+% Paramter choices: 'off' (Default), 'legacy', 'reduced', 'complete'
+if isfield(para, 'qdGeneratorType')
+    assert(any(strcmp(para.qdGeneratorType, {'off', 'legacy', 'reduced', 'complete'})),...
+        'Invalid value %s for field ''qdGeneratorType''', para.qdGeneratorType)
+else
+    para.qdGeneratorType = 'off';
+end
 
 % This is switch to turn ON or OFF randomization.
 % 1 = random (Default), 0 = Tx,Rx are determined by Tx,Rx paramters

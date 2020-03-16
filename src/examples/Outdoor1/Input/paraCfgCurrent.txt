@@ -8,7 +8,7 @@ numberOfNodes	2
 numberOfTimeDivisions	1
 referencePoint	[285.27,178.7,2]
 selectPlanesByDist	10
-switchQDGenerator	0
+qdGeneratorType	off
 switchRandomization	0
 totalNumberOfReflections	1
 totalTimeDuration	0

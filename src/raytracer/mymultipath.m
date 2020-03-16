@@ -1,6 +1,6 @@
 function [output, multipath, currentMaxPathGain, outTriangList] =...
     mymultipath(rxPos, txPos, rxVel, txVel, triangIdxList, cadData,...
-    visibilityMatrix, materialLibrary, switchQd, switchMaterial, freq,...
+    visibilityMatrix, materialLibrary, qdGeneratorType, freq,...
     minAbsolutePathGainThreshold, minRelativePathGainThreshold, currentMaxPathGain)
 %MYMULTIPATH Computes ray, if it exists, between rxPos and txPos, bouncing
 %over the given lists of triangles. Also computes QD MPCs if requested.
@@ -24,42 +24,70 @@ function [output, multipath, currentMaxPathGain, outTriangList] =...
 triangListLen = size(triangIdxList,1);
 reflOrder = size(triangIdxList,2);
 
+losDelay = norm(rxPos - txPos) / physconst('LightSpeed');
+
 % init outputs
-if switchQd
-    % concatenate D-rays and QD MPCs
-    output = nan(0, 21);
-else
-    % Only D-rays
-    output = nan(triangListLen, 21);
-    outTriangList = cell(1, triangListLen);
+switch(qdGeneratorType)
+    case 'off'
+        % Only D-rays
+        output = nan(triangListLen, 21);
+    case {'legacy', 'reduced', 'complete'}
+        % Concatenate D-rays and QD MPCs
+        % Output size not known a-priori
+        output = nan(0, 21);
+    otherwise
+        error('qdGeneratorType''%s'' not recognized', qdGeneratorType)
 end
 multipath = nan(triangListLen, 1 + 3 * (reflOrder+2));
+outTriangList = cell(1, triangListLen);
 
 multipath(:,1) = reflOrder;
 
 for i = 1:triangListLen
     currentTriangIdxs = triangIdxList(i,:);
-    arrayOfMaterials = cadData(currentTriangIdxs, 14);
     
     [pathExists, dod, doa, rowMultipath, rayLen, dopplerFactor, pathGain,...
         currentMaxPathGain] = computeSingleRay(txPos, rxPos, txVel, rxVel,...
         currentTriangIdxs, cadData, visibilityMatrix, materialLibrary,...
-        switchQd, switchMaterial, freq, minAbsolutePathGainThreshold,...
+        freq, minAbsolutePathGainThreshold,...
         minRelativePathGainThreshold, currentMaxPathGain);
     
     if pathExists
         deterministicRayOutput = fillOutputDeterm(reflOrder, dod, doa, rayLen,...
             pathGain, dopplerFactor, freq);
+        outTriangList{i} = currentTriangIdxs;
         
-        if switchQd
-            output = [output;...
-                qdGenerator(deterministicRayOutput, arrayOfMaterials, materialLibrary)];
-        else
-            output(i,:) = deterministicRayOutput;
-            outTriangList{i} = currentTriangIdxs;
+        switch(qdGeneratorType)
+            case 'off'
+                output(i,:) = deterministicRayOutput;
+                
+            case 'reduced'
+                arrayOfMaterials = cadData(currentTriangIdxs, 14);
+                
+                qdOutput = reducedMultipleReflectionQdGenerator(...
+                    deterministicRayOutput,...
+                    arrayOfMaterials,...
+                    materialLibrary,...
+                    losDelay);
+                
+                output = [output; qdOutput];
+                
+            case 'complete'
+                arrayOfMaterials = cadData(currentTriangIdxs, 14);
+                
+                qdOutput = completeMultipleReflectionQdGenerator(...
+                    deterministicRayOutput,...
+                    arrayOfMaterials,...
+                    materialLibrary,...
+                    losDelay);
+                
+                output = [output; qdOutput];
+                
+            otherwise
+                error('qdGeneratorType=''%s'' not supported', qdGeneratorType);
         end
         
-        multipath(i,2:end) = rowMultipath;
+        multipath(i, 2:end) = rowMultipath;
     end
 end
 
