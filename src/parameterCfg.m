@@ -40,7 +40,11 @@ function para = parameterCfg(scenarioNameStr)
 
 % Load Parameters
 cfgPath = fullfile(scenarioNameStr, 'Input/paraCfgCurrent.txt');
-paraList = readtable(cfgPath,'Delimiter','\t');
+
+opts = detectImportOptions(cfgPath);
+opts.DataLines = [2 Inf]; % First row reserved for column names
+opts.VariableTypes = {'char', 'char'}; % Different types of each parameter
+paraList = readtable(cfgPath, opts);
 
 paraCell = (table2cell(paraList))';
 para = cell2struct(paraCell(2,:), paraCell(1,:), 2);
