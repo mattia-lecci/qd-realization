@@ -10,7 +10,8 @@ for i = 1:length(nodePosList)
     
     idx = str2double(tok{1}{1});
     filepath = fullfile(nodePosList(i).folder, nodePosList(i).name);
-    nodesPositions{idx} = csvread(filepath);
+    t = readtable(filepath); % for backward compatibility
+    nodesPositions{idx} = t{:, :};
 end
 
 end
