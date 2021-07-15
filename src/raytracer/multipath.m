@@ -89,10 +89,12 @@ addParameter(p,'indStoc',1)
 addParameter(p,'qTx',struct('center', Tx, 'angle', [0 0 0]))
 addParameter(p,'qRx',struct('center', Rx, 'angle', [0 0 0]))
 addParameter(p,'reflectionLoss',10);
+addParameter(p,'reflectionCoefficient',[0.3162; 0.3162]);
 parse(p, varargin{:});
 qTx = p.Results.qTx;
 qRx = p.Results.qRx;
 rl  = p.Results.reflectionLoss;
+rc  = p.Results.reflectionCoefficient;
 
 %% Init
 indexMultipath = 1;
@@ -143,11 +145,11 @@ if numberOfRowsArraysOfPlanes>0
                     case 'nistMeasurements'
                             reflectionLoss = getNistReflectionLoss(MaterialLibrary,...
                             arrayOfMaterials(iterateNumberOfRowsArraysOfPlanes,:),...
-                            'randOn', diffuseGeneratorSwitch); 
+                            'randOn', diffuseGeneratorSwitch, 'defaultRl', rl); 
                     case 'tgayMeasurements'
                             reflectionLoss = getTgayReflectionLoss(MaterialLibrary,...  
                             arrayOfMaterials(iterateNumberOfRowsArraysOfPlanes,:),...
-                            multipath(indexMultipath,:));                  
+                            multipath(indexMultipath,:), 'defaultRc', rc);                  
                 end
              else
                 % Assumption: r1 loss at each reflection if

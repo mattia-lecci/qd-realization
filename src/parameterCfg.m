@@ -153,6 +153,10 @@ end
 % Reflection Loss used if material library is not defined
 para = fieldToNum(para, 'reflectionLoss', [], 10);
 
+% Reflection Coefficient used if material is not present in material
+% library
+para = fieldToNum(para, 'reflectionCoefficient', [], [0.3162; 0.3162]); % [0.3162; 0.3162] for RL 10 dB
+
 % Use output in Json format. Json output reduces number of output files and
 % reduces execution time as output is written only once at the end of the 
 % raytracing operations instead to be written at run-time. 

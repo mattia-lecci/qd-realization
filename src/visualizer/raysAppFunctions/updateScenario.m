@@ -87,6 +87,7 @@ end
 
 
 function setupTimestepInfo(app)
+
 app.timestepInfo = struct();
 
 extractQdFilesInfo(app);
@@ -119,8 +120,15 @@ end
 
 function extractQdFilesInfo(app)
 qdFiles = dir(sprintf('%s/QdFiles',app.ns3Path));
-qdFileName = qdFiles(3).name;
-[~,~,extension]=fileparts(qdFileName);
+cd(sprintf('%s/QdFiles',app.ns3Path));
+if isfile(fullfile(cd, 'qdOutput.json'))
+   extension = '.json';
+else
+    qdFileName = qdFiles(3).name;
+    [~,~,extension]=fileparts(qdFileName);    
+end
+% qdFileName = qdFiles(3).name;
+% [~,~,extension]=fileparts(qdFileName); 
 switch extension
     case '.json'
         qdOutput = readQdJsonFile(sprintf('%s/QdFiles/qdOutput.json',...
@@ -166,23 +174,24 @@ switch extension
             end
         end
     case '.txt'
-        for i = 1:length(qdFiles)
-            token = regexp(qdFiles(i).name,'Tx(\d+)Rx(\d+).txt','tokens');
-            if isempty(token)
-                continue
-            end
-            
-            % else
-            tx = str2double(token{1}{1}) + 1;
-            rx = str2double(token{1}{2}) + 1;
-            
-            qd = readQdFile(sprintf('%s/%s',...
-                qdFiles(i).folder,qdFiles(i).name));
-            
-            for t = 1:length(qd)
-                app.timestepInfo(t).qdInfo(tx,rx) = qd(t);
-            end
-        end
+%         for i = 1:length(qdFiles)
+%             token = regexp(qdFiles(i).name,'Tx(\d+)Rx(\d+).txt','tokens');
+%             if isempty(token)
+%                 continue
+%             end
+%             
+%             % else
+%             tx = str2double(token{1}{1}) + 1;
+%             rx = str2double(token{1}{2}) + 1;
+%             
+%             qd = readQdFile(sprintf('%s/%s',...
+%                 qdFiles(i).folder,qdFiles(i).name));
+%             
+%             for t = 1:length(qd)
+%                 app.timestepInfo(t).paaInfo(1,1).qdInfo(tx,rx) = qd(t);
+%             end
+%         end
+    warning('QD components cannot be displayed for txt format. Set outputFormat = json (or both) in paraCfgCurrent.txt')
 end
 
 end

@@ -44,8 +44,10 @@ function reflectionLoss = getNistReflectionLoss(materialLibrary, arrayOfMaterial
 %% Varargin processing
 p = inputParser;
 addParameter(p,'randOn',0)
+addParameter(p,'defaultRl',10);
 parse(p, varargin{:});
 randOn = p.Results.randOn;
+defaultRl  = p.Results.defaultRl;
 
 %% Init
 reflectionLoss = 0;
@@ -53,15 +55,19 @@ reflectionLoss = 0;
 %% Loop over reflection order
 for i = 1:length(arrayOfMaterials)
     matIdx = arrayOfMaterials(i);
-    if randOn ==0
-        muRl = materialLibrary.mu_RL(matIdx);
-        reflectionLoss = reflectionLoss + muRl;
-
+    if isnan(matIdx)
+        reflectionLoss = reflectionLoss + defaultRl;
     else
-        s_material = materialLibrary.s_RL(matIdx);
-        sigma_material = materialLibrary.sigma_RL(matIdx);
-        rl = rndRician(s_material, sigma_material, 1, 1);
-        reflectionLoss = reflectionLoss + rl ;
+        if randOn ==0
+            muRl = materialLibrary.mu_RL(matIdx);
+            reflectionLoss = reflectionLoss + muRl;
+
+        else
+            s_material = materialLibrary.s_RL(matIdx);
+            sigma_material = materialLibrary.sigma_RL(matIdx);
+            rl = rndRician(s_material, sigma_material, 1, 1);
+            reflectionLoss = reflectionLoss + rl ;
+        end
     end
 end
 end

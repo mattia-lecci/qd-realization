@@ -1,5 +1,5 @@
 function reflectionLossdB = getTgayReflectionLoss(MaterialLibrary,...
-                arrayOfMaterials, multipath)
+                arrayOfMaterials, multipath, varargin)
 % GETTGAYREFLECTIONLOSS returns the ray reflection loss in dB 
 % based on TGay measurements [1]
 % [1] A. Maltsev, A. Pudeyev, A. Lomayev, and I. Bolotin, "Channel models 
@@ -57,8 +57,14 @@ function reflectionLossdB = getTgayReflectionLoss(MaterialLibrary,...
 %
 % 2020-2021 NIST/CTL (neeraj.varshney@nist.gov)
 
+%% Varargin processing
+p = inputParser;
+addParameter(p,'defaultRc',[0.3162; 0.3162]);
+parse(p, varargin{:});
+defaultRc  = p.Results.defaultRc;
+
 % Get reflectances for Vertical and Horizontal polarization
-reflectionCoefficient = getReflectance(MaterialLibrary,arrayOfMaterials,multipath);
+reflectionCoefficient = getReflectance(MaterialLibrary,arrayOfMaterials,multipath, defaultRc);
 % Calculate reflection loss. It is the sum (in dB) of the mean
 % of the Vertical and Horizontal reflectances for each reflection.
 reflectionLoss = prod(sqrt(mean(abs(reflectionCoefficient).^2))); 
@@ -66,7 +72,7 @@ reflectionLossdB = -20*log10(reflectionLoss);
 end
 
 function reflectionCoefficient = getReflectance(MaterialLibrary,...
-                                                arrayOfMaterials,multipath)
+                                                arrayOfMaterials,multipath, defaultRc)
 % REFLECTIONCOEFFICIENT function returns reflectances for Vertical and 
 % Horizontal polarization for each reflection using the incident angle and  
 % relative permittivity of the material in the Fresnel equation.
@@ -98,15 +104,19 @@ for reflectionOrderIndex = 1:orderReflection
         'reflection. Thus, order of reflection cannot be considered ',... 
         'higher than second order reflection.'));
     end
-    % Use Fresnel equation to derive power reflectivity                
-    relativePermittivity = MaterialLibrary.RelativePermittivity...
-                            (reflectionMaterialIndex); 
-    aor = incidentAngle(reflectionOrderIndex);
-    B_h =  relativePermittivity - sind(aor)^2;                
-    B_v = (relativePermittivity - sind(aor)^2)/relativePermittivity^2; 
-    reflectionCoefficient(:, reflectionOrderIndex) = [ ...
-        (-cosd(aor) + sqrt(B_v))/(cosd(aor) + sqrt(B_v)); ... % Vertical 
-        (cosd(aor) - sqrt(B_h))/(cosd(aor) + sqrt(B_h))];    % Horizontal
+    % Use Fresnel equation to derive power reflectivity
+    if isnan(reflectionMaterialIndex)
+        reflectionCoefficient(:, reflectionOrderIndex) = defaultRc;
+    else
+        relativePermittivity = MaterialLibrary.RelativePermittivity...
+                                (reflectionMaterialIndex); 
+        aor = incidentAngle(reflectionOrderIndex);
+        B_h =  relativePermittivity - sind(aor)^2;                
+        B_v = (relativePermittivity - sind(aor)^2)/relativePermittivity^2; 
+        reflectionCoefficient(:, reflectionOrderIndex) = [ ...
+            (-cosd(aor) + sqrt(B_v))/(cosd(aor) + sqrt(B_v)); ... % Vertical 
+            (cosd(aor) - sqrt(B_h))/(cosd(aor) + sqrt(B_h))];    % Horizontal
+    end
 end     
 end
 
